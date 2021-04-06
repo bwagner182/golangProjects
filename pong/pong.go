@@ -20,6 +20,17 @@ import (
 
 const winWidth, winHeight int = 1000, 750
 
+type gameState int
+
+const (
+	start gameState = iota
+	play
+	pause
+	gameOver
+)
+
+var state = start
+
 var nums = [][]byte{
 	{
 		1, 1, 1,
@@ -227,8 +238,9 @@ func (ball *ball) update(paddle1 *paddle, paddle2 *paddle, points *points, elaps
 	// Point Scoring
 	if float32(ball.x)-ball.radius < 0 {
 		points.comp += 1
-		fmt.Println(points.player, ":", points.comp)
+		state = pause
 		if points.comp >= 7 {
+			state = gameOver
 			fmt.Println("Computer wins!!")
 			os.Exit(0)
 		}
@@ -238,8 +250,9 @@ func (ball *ball) update(paddle1 *paddle, paddle2 *paddle, points *points, elaps
 		ball.resetBall(1)
 	} else if float32(ball.x)+ball.radius > float32(winWidth) {
 		points.player += 1
-		fmt.Println(points.player, ":", points.comp)
+		state = pause
 		if points.player >= 7 {
+			state = gameOver
 			fmt.Println("Player wins!!")
 			os.Exit(0)
 		}
@@ -410,16 +423,30 @@ func main() {
 			}
 		}
 
+		if state == play {
+			player1.update(keyState, elapsedTime)
+			player2.aiUpdate(&ball, elapsedTime)
+			ball.update(&player1, &player2, &points, elapsedTime)
+			if keyState[sdl.SCANCODE_ESCAPE] != 0 {
+				state = pause
+			}
+		} else if state == start {
+			if keyState[sdl.SCANCODE_SPACE] != 0 {
+				points.player = 0
+				points.comp = 0
+				state = play
+			}
+		} else if state == pause {
+			if keyState[sdl.SCANCODE_SPACE] != 0 {
+				state = play
+			}
+		} else if state == gameOver {
+			sdl.Quit()
+		}
+
 		clearScreen(pixels)
-		// fmt.Println(points)
-
-		drawNumber(pos{int(winWidth) / 4, 100}, color{241, 241, 241}, 20, int(points.player), pixels)
-		drawNumber(pos{(int(winWidth) / 4) * 3, 100}, color{241, 241, 241}, 20, int(points.comp), pixels)
-
-		player1.update(keyState, elapsedTime)
-		player2.aiUpdate(&ball, elapsedTime)
-		ball.update(&player1, &player2, &points, elapsedTime)
-
+		drawNumber(pos{int(winWidth) / 5, 50}, color{241, 241, 241}, 10, int(points.player), pixels)
+		drawNumber(pos{(int(winWidth) / 5) * 4, 50}, color{241, 241, 241}, 10, int(points.comp), pixels)
 		player1.draw(pixels)
 		player2.draw(pixels)
 		ball.draw(pixels)
