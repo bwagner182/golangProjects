@@ -20,6 +20,85 @@ import (
 
 const winWidth, winHeight int = 1000, 750
 
+var nums = [][]byte{
+	{
+		1, 1, 1,
+		1, 0, 1,
+		1, 0, 1,
+		1, 0, 1,
+		1, 1, 1,
+	},
+	{
+		0, 1, 0,
+		0, 1, 0,
+		0, 1, 0,
+		0, 1, 0,
+		0, 1, 0,
+	},
+	{
+		1, 1, 1,
+		0, 0, 1,
+		1, 1, 1,
+		1, 0, 0,
+		1, 1, 1,
+	},
+	{
+		1, 1, 1,
+		0, 0, 1,
+		1, 1, 1,
+		0, 0, 1,
+		1, 1, 1,
+	},
+	{
+		1, 0, 1,
+		1, 0, 1,
+		1, 1, 1,
+		0, 0, 1,
+		0, 0, 1,
+	},
+	{
+		1, 1, 1,
+		1, 0, 0,
+		1, 1, 1,
+		0, 0, 1,
+		1, 1, 1,
+	},
+	{
+		1, 1, 1,
+		1, 0, 0,
+		1, 1, 1,
+		1, 0, 1,
+		1, 1, 1,
+	},
+	{
+		1, 1, 1,
+		0, 0, 1,
+		0, 0, 1,
+		0, 0, 1,
+		0, 0, 1,
+	},
+}
+
+func drawNumber(pos pos, color color, size int, num int, pixels []byte) {
+	startX := int(pos.x) - (size*3)/2
+	startY := int(pos.y) - (size*5)/2
+
+	for i, v := range nums[num] {
+		if v == 1 {
+			for y := startY; y < startY+size; y++ {
+				for x := startX; x < startX+size; x++ {
+					setPixel(float32(x), float32(y), color, pixels)
+				}
+			}
+		}
+		startX += size
+		if (i+1)%3 == 0 {
+			startY += size
+			startX -= size * 3
+		}
+	}
+}
+
 type points struct {
 	player float32
 	comp   float32
@@ -333,6 +412,9 @@ func main() {
 
 		clearScreen(pixels)
 		// fmt.Println(points)
+
+		drawNumber(pos{int(winWidth) / 4, 100}, color{241, 241, 241}, 20, int(points.player), pixels)
+		drawNumber(pos{(int(winWidth) / 4) * 3, 100}, color{241, 241, 241}, 20, int(points.comp), pixels)
 
 		player1.update(keyState, elapsedTime)
 		player2.aiUpdate(&ball, elapsedTime)
