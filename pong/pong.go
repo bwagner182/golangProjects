@@ -1,9 +1,6 @@
 package main
 
 // TODO
-// Display Score (quit at win/7 points)
-// Framrate independent of the speed of the ball/paddle
-// Segment the paddle (change angle based on where the ball and paddle connect)
 // Handle window resizing
 // Make AI less perfect (make human capable of scoring)
 // Mouse/Joystick control
