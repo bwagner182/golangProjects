@@ -143,7 +143,7 @@ func (ball *ball) update(paddle1 *paddle, paddle2 *paddle, points *points, elaps
 				if ball.yVel >= 0 {
 					ball.yVel = -ball.yVel
 				}
-			} else if float32(ball.y) <= float32(paddle1.y)-((paddle1.h/2)/3*2) && float32(ball.y) <= float32(paddle1.y) {
+			} else if float32(ball.y) <= float32(paddle1.y)-((paddle1.h/2)/3*2) && float32(ball.y) <= float32(paddle1.y)-((paddle1.h/2)/3) {
 				ball.yVel = ball.yVel - 90
 				if ball.yVel >= 0 {
 					ball.yVel = -ball.yVel
@@ -189,7 +189,7 @@ func (ball *ball) update(paddle1 *paddle, paddle2 *paddle, points *points, elaps
 				if ball.yVel >= 0 {
 					ball.yVel = -ball.yVel
 				}
-			} else if float32(ball.y) <= float32(paddle2.y)-((paddle2.h/2)/3*2) && float32(ball.y) <= float32(paddle2.y) {
+			} else if float32(ball.y) <= float32(paddle2.y)-((paddle2.h/2)/3*2) && float32(ball.y) <= float32(paddle2.y)-((paddle2.h/2)/3) {
 				ball.yVel = ball.yVel - 90
 				if ball.yVel >= 0 {
 					ball.yVel = -ball.yVel
