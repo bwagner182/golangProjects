@@ -427,8 +427,12 @@ func main() {
 		renderer.Copy(tex, nil, nil)
 		renderer.Present()
 
-		sdl.Delay(10)
+		// sdl.Delay(10)
 		elapsedTime = float32(time.Since(frameStart).Seconds())
 		// fmt.Println(elapsedTime)
+		if elapsedTime < .005 {
+			sdl.Delay(5 - uint32(elapsedTime/1000))
+			elapsedTime = float32(time.Since(frameStart).Seconds())
+		}
 	}
 }
