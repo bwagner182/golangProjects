@@ -1,8 +1,6 @@
 package main
 
 // TODO
-// Handle window resizing
-// Make AI less perfect (make human capable of scoring)
 // Mouse/Joystick control
 // Load images for assets
 
@@ -325,8 +323,12 @@ func (paddle *paddle) update(keyState []uint8, elapsedTime float32) {
 }
 
 func (paddle *paddle) aiUpdate(ball *ball, elapsedTime float32) {
-	// Unbeatable, computer will always perfectly follow the ball
-	paddle.y = ball.y
+	// User can score, must get the vertical velocity sufficiently high
+	if ball.y > paddle.y {
+		paddle.y = int(float32(paddle.y) + (paddle.speed/2)*elapsedTime)
+	} else if ball.y < paddle.y {
+		paddle.y = int(float32(paddle.y) - (paddle.speed/2)*elapsedTime)
+	}
 }
 
 func (paddle *paddle) draw(pixels []byte) {
