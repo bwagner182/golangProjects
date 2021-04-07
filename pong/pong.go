@@ -1,5 +1,9 @@
 package main
 
+/**
+ * Pong
+ * Version: 0.3
+ */
 // TODO
 // Mouse/Joystick control
 // Load images for assets
@@ -104,6 +108,8 @@ func drawNumber(pos pos, color color, size int, num int, pixels []byte) {
 		}
 	}
 }
+
+var winningScore float32 = 7
 
 type points struct {
 	player float32
@@ -234,7 +240,7 @@ func (ball *ball) update(paddle1 *paddle, paddle2 *paddle, points *points, elaps
 	if float32(ball.x)-ball.radius < 0 {
 		points.comp += 1
 		state = pause
-		if points.comp >= 7 {
+		if points.comp >= winningScore {
 			state = gameOver
 			fmt.Println("Computer wins!!")
 			os.Exit(0)
@@ -246,7 +252,7 @@ func (ball *ball) update(paddle1 *paddle, paddle2 *paddle, points *points, elaps
 	} else if float32(ball.x)+ball.radius > float32(winWidth) {
 		points.player += 1
 		state = pause
-		if points.player >= 7 {
+		if points.player >= winningScore {
 			state = gameOver
 			fmt.Println("Player wins!!")
 			os.Exit(0)
