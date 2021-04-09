@@ -1,10 +1,10 @@
 package main
 
-// Experiment! draw some crazy stuff!
-// Gist it next week and I'll show it off on stream
-
 import (
 	"fmt"
+	"runtime"
+	"sync"
+	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -76,25 +76,48 @@ func fbn(x, y, frequency, lacurnarity, gain float32, octaves int) float32 {
 	return sum
 }
 
-func makeNoise(pixels []byte, frequency, lacurnarity, gain float32, octaves int) {
+func makeNoise(pixels []byte, frequency, lacurnarity, gain float32, octaves int, w, h int) {
+	var mutex = &sync.Mutex{}
+	startTime := time.Now()
 	noise := make([]float32, winWidth*winHeight)
-	fmt.Println("freq:", frequency, "lac:", lacurnarity, "gain:", gain, "octaves:", octaves)
+	// fmt.Println("freq:", frequency, "lac:", lacurnarity, "gain:", gain, "octaves:", octaves)
 
-	i := 0
 	min := float32(9999.0)
 	max := float32(-9999.0)
 
-	for y := 0; y < winHeight; y++ {
-		for x := 0; x < winWidth; x++ {
-			noise[i] = turbulence(float32(x), float32(y), frequency, lacurnarity, gain, octaves)
-			if noise[i] < min {
-				min = noise[i]
-			} else if noise[i] > max {
-				max = noise[i]
+	numRoutines := runtime.NumCPU()
+	var wg sync.WaitGroup
+	wg.Add(numRoutines)
+
+	batchSize := len(noise) / numRoutines
+
+	for i := 0; i < numRoutines; i++ {
+		go func(i int) {
+			defer wg.Done()
+			start := i * batchSize
+			end := start + batchSize - 1
+			for j := start; j < end; j++ {
+				x := j % w
+				y := (j - x) / h
+				noise[j] = turbulence(float32(x), float32(y), frequency, lacurnarity, gain, octaves)
+
+				// Possible race condition
+				if noise[j] < min || noise[j] > max {
+					mutex.Lock()
+
+					if noise[j] < min {
+						min = noise[j]
+					} else if noise[j] > max {
+						max = noise[j]
+					}
+					mutex.Unlock()
+				}
 			}
-			i++
-		}
+		}(i)
 	}
+	wg.Wait()
+	elapsedTime := time.Since(startTime).Seconds() * 1000
+	fmt.Println(elapsedTime)
 	gradient := getDualGradient(color{0, 0, 175}, color{80, 160, 244}, color{12, 192, 75}, color{255, 255, 255})
 	rescaleDraw(min, max, gradient, pixels, noise)
 }
@@ -168,7 +191,7 @@ func main() {
 	lacurnarity := float32(3.0)
 	octaves := 3
 
-	makeNoise(pixels, frequency, lacurnarity, gain, octaves)
+	makeNoise(pixels, frequency, lacurnarity, gain, octaves, winWidth, winHeight)
 	keyState := sdl.GetKeyboardState()
 
 	// Changd after EP 06 to address MacOSX
@@ -190,22 +213,22 @@ func main() {
 
 		if keyState[sdl.SCANCODE_O] != 0 {
 			octaves = octaves + 1*mult
-			makeNoise(pixels, frequency, lacurnarity, gain, octaves)
+			makeNoise(pixels, frequency, lacurnarity, gain, octaves, winWidth, winHeight)
 		}
 
 		if keyState[sdl.SCANCODE_F] != 0 {
 			frequency = frequency + .001*float32(mult)
-			makeNoise(pixels, frequency, lacurnarity, gain, octaves)
+			makeNoise(pixels, frequency, lacurnarity, gain, octaves, winWidth, winHeight)
 		}
 
 		if keyState[sdl.SCANCODE_G] != 0 {
-			gain = gain + 0.1*float32(mult)
-			makeNoise(pixels, frequency, lacurnarity, gain, octaves)
+			gain = gain + 0.01*float32(mult)
+			makeNoise(pixels, frequency, lacurnarity, gain, octaves, winWidth, winHeight)
 		}
 
 		if keyState[sdl.SCANCODE_L] != 0 {
-			lacurnarity = lacurnarity + 0.1*float32(mult)
-			makeNoise(pixels, frequency, lacurnarity, gain, octaves)
+			lacurnarity = lacurnarity + 0.001*float32(mult)
+			makeNoise(pixels, frequency, lacurnarity, gain, octaves, winWidth, winHeight)
 		}
 
 		tex.Update(nil, pixels, winWidth*4)
