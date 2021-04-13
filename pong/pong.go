@@ -467,8 +467,8 @@ func main() {
 
 	keyState := sdl.GetKeyboardState()
 
-	noise, min, max := noise.MakeNoise(noise.FBM, .001, 0.5, 2, 3, winWidth, winHeight)
-	gradient := getGradient(color{241, 0, 0}, color{0, 252, 149})
+	noise, min, max := noise.MakeNoise(noise.FBM, .001, 0.2, 3, 3, winWidth, winHeight)
+	gradient := getGradient(color{241, 0, 0}, color{0, 0, 149})
 
 	var frameStart time.Time
 	var elapsedTime float32
@@ -507,7 +507,7 @@ func main() {
 			sdl.Quit()
 		}
 
-		rescaleDraw(min, max, gradient, pixels, noise)
+		rescaleDraw(float32(min), float32(max), gradient, pixels, noise)
 		drawNumber(pos{int(winWidth) / 5, 50}, color{241, 241, 241}, 10, int(points.player), pixels)
 		drawNumber(pos{(int(winWidth) / 5) * 4, 50}, color{241, 241, 241}, 10, int(points.comp), pixels)
 		player1.draw(pixels)

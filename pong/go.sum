@@ -1,2 +1,4 @@
+github.com/bwagner182/golangProjects/noise v0.0.0-20210413182006-5125a8b6e1ce h1:kmIGpV8/9d72pvufgYAxk9SK/HxvIp1UPbzNhkBON/w=
+github.com/bwagner182/golangProjects/noise v0.0.0-20210413182006-5125a8b6e1ce/go.mod h1:8GkpWN8GACmMlXjx8/A3C0K3GFw7Gyei9TbDPZw9ZGY=
 github.com/veandco/go-sdl2 v0.4.5 h1:GFIjMabK7y2XWpr9sGvN7RDKHt7vrA7XPTUW60eOw+Y=
 github.com/veandco/go-sdl2 v0.4.5/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=

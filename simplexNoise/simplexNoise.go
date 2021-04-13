@@ -117,7 +117,7 @@ func makeNoise(pixels []byte, frequency, lacurnarity, gain float32, octaves int,
 	}
 	wg.Wait()
 	elapsedTime := time.Since(startTime).Seconds() * 1000
-	fmt.Println(elapsedTime)
+	// fmt.Println(elapsedTime)
 	gradient := getDualGradient(color{0, 0, 175}, color{80, 160, 244}, color{12, 192, 75}, color{255, 255, 255})
 	rescaleDraw(min, max, gradient, pixels, noise)
 }
