@@ -14,6 +14,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/bwagner182/golangProjects/noise"
+
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -365,6 +367,59 @@ func clearScreen(pixels []byte) {
 	}
 }
 
+func lerp(b1, b2 byte, pct float32) byte {
+	return byte(float32(b1) + pct*(float32(b2)-float32(b1)))
+}
+
+func colorLerp(c1, c2 color, pct float32) color {
+	return color{lerp(c1.r, c2.r, pct), lerp(c1.g, c2.g, pct), lerp(c1.b, c2.b, pct)}
+}
+
+func getGradient(c1, c2 color) []color {
+	result := make([]color, 256)
+	for i := range result {
+		pct := float32(i) / float32(255)
+		result[i] = colorLerp(c1, c2, pct)
+	}
+	return result
+}
+
+func getDualGradient(c1, c2, c3, c4 color) []color {
+	result := make([]color, 256)
+	for i := range result {
+		pct := float32(i) / float32(255)
+		if pct < 0.5 {
+			result[i] = colorLerp(c1, c2, pct*float32(2))
+		} else {
+			result[i] = colorLerp(c3, c4, pct*float32(1.5)-float32(0.5))
+		}
+	}
+	return result
+}
+
+func clamp(min, max, v int) int {
+	if v < min {
+		v = min
+	} else if v > max {
+		v = max
+	}
+	return v
+}
+
+func rescaleDraw(min float32, max float32, gradient []color, pixels []byte, noise []float32) {
+	scale := 255.0 / (max - min)
+	offset := min * scale
+
+	for i := range noise {
+		noise[i] = noise[i]*scale - offset
+		c := gradient[clamp(0, 255, int(noise[i]))]
+		p := i * 4
+		pixels[p] = c.r
+		pixels[p+1] = c.g
+		pixels[p+2] = c.b
+	}
+}
+
 func main() {
 	// Added after EP06 to address macosx issues
 	err := sdl.Init(sdl.INIT_EVERYTHING)
@@ -412,6 +467,9 @@ func main() {
 
 	keyState := sdl.GetKeyboardState()
 
+	noise, min, max := noise.MakeNoise(noise.FBM, .001, 0.5, 2, 3, winWidth, winHeight)
+	gradient := getGradient(color{241, 0, 0}, color{0, 252, 149})
+
 	var frameStart time.Time
 	var elapsedTime float32
 
@@ -449,7 +507,7 @@ func main() {
 			sdl.Quit()
 		}
 
-		clearScreen(pixels)
+		rescaleDraw(min, max, gradient, pixels, noise)
 		drawNumber(pos{int(winWidth) / 5, 50}, color{241, 241, 241}, 10, int(points.player), pixels)
 		drawNumber(pos{(int(winWidth) / 5) * 4, 50}, color{241, 241, 241}, 10, int(points.comp), pixels)
 		player1.draw(pixels)
@@ -463,7 +521,7 @@ func main() {
 		elapsedTime = float32(time.Since(frameStart).Seconds())
 		// fmt.Println(elapsedTime)
 		if elapsedTime < .005 {
-			sdl.Delay(5 - uint32(elapsedTime/1000))
+			sdl.Delay(5 - uint32(elapsedTime*1000))
 			elapsedTime = float32(time.Since(frameStart).Seconds())
 		}
 	}
